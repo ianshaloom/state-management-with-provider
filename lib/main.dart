@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,35 +13,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    //NOTE - Provider Widget Initialization
+
+    /** -------------------------------------------------------------------------- *
+     * When we use the Provider widget, we need to specify the type of data we want to provide.
+     * In this case, we want to provide a Dog object, so we specify Dog as the type.
+     * The create parameter is a callback that returns the data we want to provide.
+     * By doing so the Dog object will be accessible to all the widgets in the widget tree below the Provider widget.
+     * -------------------------------------------------------------------------- *
+     */
+
+    return Provider<Dog>(
+      create: (_) => Dog(name: 'Fido', age: 3, breed: 'Labrador'),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: const MyHomePage(),
       ),
-      debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: 'Provider'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,118 +47,84 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text('Provider 01'),
+        centerTitle: true,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              color: Theme.of(context).colorScheme.primary,
-              padding: const EdgeInsets.all(20.0),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: const Text(
-                'Counter App',
+                'Accessing the Dog object from the widget tree below the Provider widget',
+                textAlign: TextAlign.justify,
               ),
             ),
-            const SizedBox(height: 20.0),
-            CounterA(
-              counter: _counter,
-              increment: _incrementCounter,
+            const SizedBox(height: 150.0),
+            //NOTE - Accessing the Dog object from the widget tree below the Provider widget
+            /**
+             * -------------------------------------------------------------------------- *
+             * To access the Dog object from the widget tree below the Provider widget, we use the Provider.of() method.
+             * 
+             * We call the Provider.of() method with type Dog as generic type parameter.
+             * This means that the Provider.of() method will return a Dog object only.
+             * If there are two or more instances of the Dog class in the widget tree,
+             * the Provider.of() method will return the nearest Dog object.
+             * 
+             * The Provider.of() method takes the BuildContext as a parameter and returns the Dog object.
+             * The BuildContext is used to find the nearest Provider widget in the widget tree.
+             * -------------------------------------------------------------------------- *
+             */
+            Text(
+              '- dog Name: ${Provider.of<Dog>(context).name}',
             ),
             const SizedBox(height: 20.0),
-            Middle(
-              counter: _counter,
-            ),
+            BreedAndAge(),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
 
-class CounterA extends StatelessWidget {
-  final int counter;
-  final void Function() increment;
-  const CounterA({super.key, required this.counter, required this.increment});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.secondary,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          Text(
-            counter.toString(),
-          ),
-          const SizedBox(height: 20.0),
-          ElevatedButton(
-            onPressed: increment,
-            child: const Text('Increment'),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class Middle extends StatelessWidget {
-  final int counter;
-  const Middle({super.key, required this.counter});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.secondary,
-      padding: const EdgeInsets.all(20.0),
-      margin: const EdgeInsets.all(50.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CounterB(counter: counter),
-          const SizedBox(width: 20.0),
-          Sibling(),
-        ],
-      ),
-    );
-  }
-}
-
-class CounterB extends StatelessWidget {
-  final int counter;
-  const CounterB({
-    super.key,
-    required this.counter,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(5.0),
-      color: Colors.red,
-      child: Text(
-        counter.toString(),
-      ),
-    );
-  }
-}
-
-class Sibling extends StatelessWidget {
-  const Sibling({
+class BreedAndAge extends StatelessWidget {
+  const BreedAndAge({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.green,
-      padding: const EdgeInsets.all(5.0),
-      child: const Text('Increment'),
+    return Column(
+      children: [
+        Text(
+          '- dog Breed: ${Provider.of<Dog>(context).breed}',
+        ),
+        const SizedBox(height: 20.0),
+        Age(),
+      ],
+    );
+  }
+}
+
+class Age extends StatelessWidget {
+  const Age({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '- dog Age: ${Provider.of<Dog>(context).age}',
+        ),
+        const SizedBox(height: 20.0),
+        FilledButton(
+          onPressed: Provider.of<Dog>(context, listen: false).growOlder,
+          child: const Text('Add'),
+        )
+      ],
     );
   }
 }
