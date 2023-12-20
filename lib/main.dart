@@ -41,7 +41,7 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Provider 03'),
+        title: Text('Provider 02'),
         centerTitle: true,
       ),
       body: Center(
@@ -51,19 +51,19 @@ class MyHomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: const Text(
-                'Accessing the Dog object from the widget tree below the Provider widget',
+                'read, watch, select extension methods',
                 textAlign: TextAlign.justify,
               ),
             ),
             const SizedBox(height: 150.0),
-            //NOTE - The Dog object is accessed from the widget tree below the Provider widget
+            //NOTE
             /**
              * The Dog object is accessed from the widget tree below the Provider widget
              * But since the Dog name property is final, it cannot be changed
              * So we can use listen: false to prevent the widget from rebuilding when the Dog object changes
              */
             Text(
-              '- dog Name: ${Provider.of<Dog>(context, listen: false).name}',
+              '- dog Name: ${context.watch<Dog>().name}',
             ),
             const SizedBox(height: 20.0),
             BreedAndAge(),
@@ -83,7 +83,7 @@ class BreedAndAge extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '- dog Breed: ${Provider.of<Dog>(context, listen: false).breed}',
+          '- dog Breed: ${context.select((Dog dog) => dog.breed)}',
         ),
         const SizedBox(height: 20.0),
         Age(),
@@ -103,17 +103,24 @@ class Age extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '- dog Age: ${Provider.of<Dog>(context).age}',
+          //NOTE
+          /**
+           * The Dog object is accessed from the widget tree below the Provider widget
+           * But since the Dog age property is not final, it can be changed
+           * By using select with generic type dog and int,
+           * the widget will rebuild only when the Dog object int property changes
+           */
+          '- dog Age: ${context.select<Dog,int>((Dog dog) => dog.age)}',
         ),
         const SizedBox(height: 20.0),
         FilledButton(
-          //NOTE - The Dog object is accessed from the widget tree below the Provider widget
+          //NOTE
           /**
            * The Dog object is accessed from the widget tree below the Provider widget
            * But since the Dog growOlder method is called, the widget will rebuild when the Dog object changes
            * So we can use listen: false to prevent the widget from rebuilding when the Dog object changes
            */
-          onPressed: Provider.of<Dog>(context, listen: false).growOlder,
+          onPressed: context.read<Dog>().growOlder,
           child: const Text('Add'),
         )
       ],
