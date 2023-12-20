@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 
 import 'model.dart';
 
@@ -13,33 +13,44 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    //NOTE - Provider Widget Initialization
-
-    /** -------------------------------------------------------------------------- *
-     * When we use the Provider widget, we need to specify the type of data we want to provide.
-     * In this case, we want to provide a Dog object, so we specify Dog as the type.
-     * The create parameter is a callback that returns the data we want to provide.
-     * By doing so the Dog object will be accessible to all the widgets in the widget tree below the Provider widget.
-     * -------------------------------------------------------------------------- *
-     */
-
-    return Provider<Dog>(
-      create: (_) => Dog(name: 'Fido', age: 3, breed: 'Labrador'),
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        debugShowCheckedModeBanner: false,
-        home: const MyHomePage(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
+      home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final dog = Dog(name: 'Fido', age: 3, breed: 'Labrador');
+
+  @override
+  void initState() {
+    super.initState();
+    dog.addListener(dogListener);
+  }
+
+  void dogListener() {
+    print('********* dogs age ${dog.age} *********\n');
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    dog.removeListener(dogListener);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +58,7 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Provider 01'),
+        title: Text('Provider 02'),
         centerTitle: true,
       ),
       body: Center(
@@ -62,35 +73,25 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 150.0),
-            //NOTE - Accessing the Dog object from the widget tree below the Provider widget
-            /**
-             * -------------------------------------------------------------------------- *
-             * To access the Dog object from the widget tree below the Provider widget, we use the Provider.of() method.
-             * 
-             * We call the Provider.of() method with type Dog as generic type parameter.
-             * This means that the Provider.of() method will return a Dog object only.
-             * If there are two or more instances of the Dog class in the widget tree,
-             * the Provider.of() method will return the nearest Dog object.
-             * 
-             * The Provider.of() method takes the BuildContext as a parameter and returns the Dog object.
-             * The BuildContext is used to find the nearest Provider widget in the widget tree.
-             * -------------------------------------------------------------------------- *
-             */
             Text(
-              '- dog Name: ${Provider.of<Dog>(context).name}',
+              '- dog Name: ${dog.name}',
             ),
             const SizedBox(height: 20.0),
-            BreedAndAge(),
+            BreedAndAge(
+              dog: dog,
+            ),
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), 
     );
   }
 }
 
 class BreedAndAge extends StatelessWidget {
+  final Dog dog;
   const BreedAndAge({
     super.key,
+    required this.dog,
   });
 
   @override
@@ -98,18 +99,22 @@ class BreedAndAge extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '- dog Breed: ${Provider.of<Dog>(context).breed}',
+          '- dog Breed: ${dog.breed}',
         ),
         const SizedBox(height: 20.0),
-        Age(),
+        Age(
+          dog: dog,
+        ),
       ],
     );
   }
 }
 
 class Age extends StatelessWidget {
+  final Dog dog;
   const Age({
     super.key,
+    required this.dog,
   });
 
   @override
@@ -117,11 +122,11 @@ class Age extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '- dog Age: ${Provider.of<Dog>(context).age}',
+          '- dog Age: ${dog.age}',
         ),
         const SizedBox(height: 20.0),
         FilledButton(
-          onPressed: Provider.of<Dog>(context, listen: false).growOlder,
+          onPressed: dog.growOlder,
           child: const Text('Add'),
         )
       ],
