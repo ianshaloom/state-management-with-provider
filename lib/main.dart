@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import 'model.dart';
@@ -13,12 +14,30 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<Dog>(
-      create: (_) => Dog(
-        name: 'Fido',
-        age: 3,
-        breed: 'Labrador',
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => Dog(
+            name: 'Fido',
+            age: 3,
+            breed: 'Labrador',
+          ),
+        ),
+        FutureProvider<int>(
+          initialData: 1,
+          create: (context) {
+            final int age = context.read<Dog>().age;
+
+            return Babies(age: 3).getBabies(age);
+          },
+        ),
+        StreamProvider<double>(
+          initialData: 1,
+          create: (context) {
+            return Babies(age: 3).getBabiesStream();
+          },
+        ),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -51,8 +70,12 @@ class MyHomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: const Text(
-                'read, watch, select extension methods',
+                'Futureprovider and Streamprovider',
                 textAlign: TextAlign.justify,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 150.0),
@@ -63,7 +86,7 @@ class MyHomePage extends StatelessWidget {
              * So we can use listen: false to prevent the widget from rebuilding when the Dog object changes
              */
             Text(
-              '- dog Name: ${context.watch<Dog>().name}',
+              '- dog Name: ${context.read<Dog>().name}',
             ),
             const SizedBox(height: 20.0),
             BreedAndAge(),
@@ -110,7 +133,29 @@ class Age extends StatelessWidget {
            * By using select with generic type dog and int,
            * the widget will rebuild only when the Dog object int property changes
            */
-          '- dog Age: ${context.select<Dog,int>((Dog dog) => dog.age)}',
+          '- dog Age: ${context.select<Dog, int>((Dog dog) => dog.age)}',
+        ),
+        const SizedBox(height: 20.0),
+        Text(
+          //NOTE
+          /**
+           * The Dog object is accessed from the widget tree below the Provider widget
+           * But since the Dog age property is not final, it can be changed
+           * By using select with generic type dog and int,
+           * the widget will rebuild only when the Dog object int property changes
+           */
+          '- babies future: ${context.watch<int>()}',
+        ),
+        const SizedBox(height: 20.0),
+        Text(
+          //NOTE
+          /**
+           * The Dog object is accessed from the widget tree below the Provider widget
+           * But since the Dog age property is not final, it can be changed
+           * By using select with generic type dog and int,
+           * the widget will rebuild only when the Dog object int property changes
+           */
+          '- babies stream: ${context.watch<double>()}',
         ),
         const SizedBox(height: 20.0),
         FilledButton(
